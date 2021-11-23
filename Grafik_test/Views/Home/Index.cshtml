@@ -1,8 +1,69 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model Grafik_test.Models.ViewModels.ScheduleVM
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Grafik";
+    var title = "Proszę wybrać miesiąc i rok";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<form method="post" enctype="multipart/form-data" asp-controller="Home" asp-action="Index">
+    <div class=border>
+        <div class="row p-3">
+            <div class="col-6 border-bottom">
+                <h3 class="text-primary">@title</h3>
+            </div>
+        </div>
+        <div class="col-6 pt-4">
+            <div class="form-group row">
+                <div class="col-2">
+                    <label>Miesiąc</label>
+                </div>
+                <div class="col-3">
+                    <select asp-items="Model.MonthList" id="idMonth" name="month"><option value="@System.DateTime.Today.Month">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.MonthNames[@System.DateTime.Today.Month - 1]</option></select>
+                </div>
+                <div class="col-1">
+                    <label>Rok</label>
+                </div>
+                <div class="col-3">
+                    <select asp-items="Model.YearList" id="idYear" name="year"><option>@System.DateTime.Today.Year</option></select>
+                </div>
+
+                <div class="col-3">
+                    <div class="row">
+                        <label>Liczba zmian</label>
+                        <input type="text" value="3" name="numberOfShifts" id="numberOfShifts" readonly />
+                    </div>
+                    <div class="row">
+                        <label>Przerwa między zmianami</label>
+                        <input type="text" value="11" name="minBreak" id="minBreak" readonly />
+                    </div>
+                    <div class="row">
+                        <label>Weekend</label>
+                        <input type="text" value="35" name="minWeekend" id="minWeekend" readonly />
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-8 pt-4">
+            <div class="form-group row">
+                <div class="col-4">
+                    <button type="submit" class="btn btn-primary form-control">Stwórz grafik</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+</form>
+
+@if (ViewBag.Name != null)
+{
+    <br />
+    <h3>@ViewBag.Name</h3>
+    <br />
+    <partial name="_ScheduleTable" model="Model" />
+}
+
+
