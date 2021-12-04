@@ -42,7 +42,6 @@ namespace Grafik_test.Models.ViewModels
         public ScheduleVM(int month, int year, List<Worker> workers, List<Wage> wages, int numberOfShifts, int minBreak, int minWeekend) : this()
         {
 
-
             Workers = workers;
             Schedule = new Schedule(month, year, workers, wages, numberOfShifts, minBreak, minWeekend);
         }
