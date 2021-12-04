@@ -65,6 +65,7 @@ namespace Grafik_test.ScheduleLogic
             NumberOfAvailableWorkers = workers.Count;
             NumberOfShifts = Month.NumberOfDays * _shiftsPerDay;
             ScheduleTable = new Shift[NumberOfShifts];
+            SalaryPerWorker = new Dictionary<int, float>();
 
             Workers = new List<int>();
             foreach (Worker worker in workers)
@@ -97,38 +98,34 @@ namespace Grafik_test.ScheduleLogic
             _minimumWeekend = minWeekend;
         }
 
-
+        
         public Shift[] CreateSchedule()
         {
-            List<Shift> scheduleList = InitSchedule();
+            List<int> scheduleList = InitSchedule();
             /*
                 Manipulowanie grafikiem tak żeby było lepiej...
             */
             return ScheduleTable;
         }
 
-        private List<Shift> InitSchedule()
+        private List<int> InitSchedule()
         {
             
             int numberOfPositions = NumberOfShifts * _workersPerShift;
-            int listSize = (int)Math.Ceiling(Convert.ToDecimal(numberOfPositions / NumberOfAvailableWorkers)) * NumberOfAvailableWorkers;
-            List<Shift> scheduleList = new List<Shift>(listSize);
-            int j = 0;
+            int listSize = (int)Math.Ceiling(Convert.ToDecimal(numberOfPositions / NumberOfAvailableWorkers));
+            List<int> scheduleList = new List<int>(listSize);
             for (int i=0;i<listSize;i++)
             {
-                scheduleList[j].SetFirstWorker(j);
-
-                j++;
-                if (j >= NumberOfAvailableWorkers) j = 0;
-
-                scheduleList[j].SetSecondWorker(j);
-
-                j++;
-                if (j >= NumberOfAvailableWorkers) j = 0;
+                scheduleList.AddRange(Workers);
             }
 
             InitSalaryDictionary(scheduleList);
             return scheduleList;
+        }
+        
+        private int GetShiftNumber(int positionInList)
+        {
+            return (positionInList / _workersPerShift);
         }
         private int GetDay(int shiftNumber)
         {
@@ -158,7 +155,7 @@ namespace Grafik_test.ScheduleLogic
 
             return (currentShift - lastShift) * (24 / _shiftsPerDay);
         }
-        private void InitSalaryDictionary(List<Shift> schedule)
+        private void InitSalaryDictionary(List<int> schedule)
         {
             // Liczymy tylko tyle ile jest zmian, nie dla całej listy "schedule"
             // W liście schedule może być więcej pozycji niż rzeczywiście jest zmian
@@ -167,13 +164,11 @@ namespace Grafik_test.ScheduleLogic
             {
                 if (IsShiftHoliday(i))
                 {
-                    SalaryPerWorker[schedule[i].FirstWorker] += _salaryPerShiftHoliday;
-                    SalaryPerWorker[schedule[i].SecondWorker] += _salaryPerShiftHoliday;
+                    SalaryPerWorker[schedule[i]] += _salaryPerShiftHoliday;
                 }
                 else
                 {
-                    SalaryPerWorker[schedule[i].FirstWorker] += _salaryPerShift;
-                    SalaryPerWorker[schedule[i].SecondWorker] += _salaryPerShift;
+                    SalaryPerWorker[schedule[i]] += _salaryPerShift;
                 }
             }
         }
@@ -183,11 +178,11 @@ namespace Grafik_test.ScheduleLogic
             {
                 if(IsShiftHoliday(newShiftNumber))
                 {
-                    SalaryPerWorker[newShiftNumber] += _salaryPerShiftHoliday;
+                    SalaryPerWorker[workerId] += _salaryPerShiftHoliday;
                 }
                 else
                 {
-                    SalaryPerWorker[newShiftNumber] += _salaryPerShiftHoliday;
+                    SalaryPerWorker[workerId] += _salaryPerShiftHoliday;
                 }
             }
         }
@@ -197,11 +192,11 @@ namespace Grafik_test.ScheduleLogic
             {
                 if (IsShiftHoliday(prevShiftNumber))
                 {
-                    SalaryPerWorker[prevShiftNumber] -= _salaryPerShiftHoliday;
+                    SalaryPerWorker[workerId] -= _salaryPerShiftHoliday;
                 }
                 else
                 {
-                    SalaryPerWorker[prevShiftNumber] -= _salaryPerShiftHoliday;
+                    SalaryPerWorker[workerId] -= _salaryPerShiftHoliday;
                 }
             }
         }
