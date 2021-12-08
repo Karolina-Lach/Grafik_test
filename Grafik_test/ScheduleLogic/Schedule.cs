@@ -26,27 +26,62 @@ namespace Grafik_test.ScheduleLogic
         }
 
 
-        
+        /// <summary>
+        /// Minimalna przerwa między zmianami
+        /// </summary>
         readonly int _minimumBreak = 11;
+        /// <summary>
+        /// Weekend raz na 7 dni
+        /// </summary>
         readonly int _minimumWeekend = 35;
-
+        /// <summary>
+        /// Stawka godzinowa w normalny dzień
+        /// </summary>
         readonly float _wagePerHour = 30;
+        /// <summary>
+        /// Stawka godzinowa w święto
+        /// </summary>
         readonly float _wagePerHolidayHour = 60;
 
+        /// <summary>
+        /// Stawki za całą zmianę
+        /// </summary>
         readonly float _salaryPerShiftHoliday;
         readonly float _salaryPerShift;
 
         public int ShiftsPerDay = 3;
+
         public Month Month;
         public int NumberOfAvailableWorkers;
+        /// <summary>
+        /// Liczba zmian w miesiącu
+        /// </summary>
         public int NumberOfShifts;
+        /// <summary>
+        /// Liczba pozycji do wypełnienia w miesiącu
+        /// </summary>
         public int NumberOfPositions;
 
+        /// <summary>
+        /// Słownik z wynagrodzeniem dla każdego pracownika
+        /// klucz - id pracownika
+        /// wartość - wynagrodzenie
+        /// </summary>
         public Dictionary<int, float> SalaryPerWorker;
 
-        public List<int> ScheduleList { get; set; }
+        /// <summary>
+        ///  Lista z grafikiem
+        /// </summary>
+        private List<int> ScheduleList { get; set; }
+
+        /// <summary>
+        /// Grafik w formie tabeli - na razie potrzebny do interfejsu, potem zobaczymy
+        /// </summary>
         public Shift[] ScheduleTable { get; set; }
 
+        /// <summary>
+        /// List z id dla wszystkich pracowników
+        /// </summary>
         public List<int> Workers;
 
         /************ CONSTRUCTORS *************************************************************************/
@@ -65,6 +100,7 @@ namespace Grafik_test.ScheduleLogic
         [Obsolete]
         public Schedule(int month, int year, List<Worker> workers, List<Wage> wages)
         {
+            // Inicjowanie właściwości
             Month = new Month(month, year);
             NumberOfAvailableWorkers = workers.Count;
             NumberOfShifts = Month.NumberOfDays * ShiftsPerDay;
@@ -72,6 +108,7 @@ namespace Grafik_test.ScheduleLogic
 
             SalaryPerWorker = new Dictionary<int, float>();
 
+            // Stworzenie listy id na podstawie listy pracowników
             Workers = new List<int>();
             foreach (Worker worker in workers)
             {
@@ -79,6 +116,7 @@ namespace Grafik_test.ScheduleLogic
                 SalaryPerWorker.Add(worker.Id, 0.0f);
             }
 
+            // inicjowanie stawek (zrobione w formie listy, ale wiadomo że u nas powinna mieć 2 elementy dla holiday i nie-holiday
             foreach (Wage wage in wages)
             {
                 if (wage.IsHoliday)
@@ -104,6 +142,10 @@ namespace Grafik_test.ScheduleLogic
         }
 
         /***********  GRAFIK  *******************************************************************************************/
+        /// <summary>
+        /// Funkcja układająca grafik
+        /// </summary>
+        /// <returns></returns>
         public Shift[] CreateSchedule()
         {
             ScheduleList = InitSchedule();
@@ -114,6 +156,12 @@ namespace Grafik_test.ScheduleLogic
             return CreateShiftArrayFromList();
         }
 
+        /// <summary>
+        /// Inicjowanie grafiki i słownika z wynagrodzeniem
+        /// Tworzy listę o odpowiednim rozmiarze, przypisuje wszystkich pracowników po kolei
+        /// Na podstawie wyznaczonej kolejności wylicza wszyskim pensję
+        /// </summary>
+        /// <returns></returns>
         private List<int> InitSchedule()
         {
 
@@ -226,7 +274,7 @@ namespace Grafik_test.ScheduleLogic
         /// <param name="position1"></param>
         /// <param name="position2"></param>
         /// <returns></returns>
-        private int GetBreakBetweenPosition(int position1, int position2)
+        private int GetBreakBetweenPositions(int position1, int position2)
         {
             return (Math.Abs(position1 - position2) - 1) * (24 / ShiftsPerDay);
         }
@@ -246,7 +294,7 @@ namespace Grafik_test.ScheduleLogic
                 return _minimumBreak;
             }
 
-            return GetBreakBetweenPosition(currentPosition, lastShift);
+            return GetBreakBetweenPositions(currentPosition, lastShift);
         }
 
         /************* SALARY ****************************/
