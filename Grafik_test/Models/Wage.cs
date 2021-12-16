@@ -18,10 +18,10 @@ namespace Grafik_test.Models
 
         }
 
-        public Wage(int id, float wagePerHoue, bool isHoliday)
+        public Wage(int id, float wagePerHour, bool isHoliday)
         {
             Id = id;
-            wagePerHoue = WagePerHour;
+            WagePerHour = wagePerHour;
             IsHoliday = isHoliday;
         }
     }

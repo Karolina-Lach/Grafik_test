@@ -63,7 +63,11 @@
     <br />
     <h3>@ViewBag.Name</h3>
     <br />
-    <partial name="_ScheduleTable" model="Model" />
+
+    <p>Maksymalna pensja: @Model.Schedule.SalaryPerWorker.Max(v => v.Value) dla @Model.Schedule.WorkerWithMaxSalary()</p>
+    <p>Minimalna pensja: @Model.Schedule.SalaryPerWorker.Min(v => v.Value) dla @Model.Schedule.WorkerWithMinSalary()</p>
+    @*<partial name="_ScheduleTable" model="Model" />*@
+    <partial name="_SimpleScheduleTable" model="Model" />
 }
 
 

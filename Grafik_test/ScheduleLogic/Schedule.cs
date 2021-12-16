@@ -148,10 +148,14 @@ namespace Grafik_test.ScheduleLogic
         /// <returns></returns>
         public Shift[] CreateSchedule()
         {
+            Random rnd = new Random();
             ScheduleList = InitSchedule();
             /*
                 Manipulowanie grafikiem tak żeby było lepiej...
             */
+            int from = rnd.Next(0, ScheduleList.Count);
+            int to = rnd.Next(0, ScheduleList.Count);
+            InsertWorker(from, to);
 
             return CreateShiftArrayFromList();
         }
@@ -166,7 +170,7 @@ namespace Grafik_test.ScheduleLogic
         {
 
             int numberOfPositions = NumberOfShifts * _workersPerShift;
-            
+
             int listSize = (int)Math.Ceiling(Convert.ToDecimal(numberOfPositions) / Convert.ToDecimal(NumberOfAvailableWorkers));
             List<int> scheduleList = new List<int>(listSize);
             for (int i = 0; i < listSize; i++)
@@ -178,7 +182,37 @@ namespace Grafik_test.ScheduleLogic
             return scheduleList;
         }
 
+        private void InsertWorker(int from, int to)
+        {
+            int tempElement = ScheduleList[from];
+            if (IsPositionPossible(tempElement, to)) {
 
+                ScheduleList.RemoveAt(from);
+                ScheduleList.Insert(to, tempElement);
+
+                AddToSalary(tempElement, to);
+                RemoveFromSalary(tempElement, from);
+
+                if (from > to)
+                {
+                    for (int i = to + 1; i <= from; i++)
+                    {
+                        int workerId = ScheduleList[i];
+                        RemoveFromSalary(workerId, i - 1);
+                        AddToSalary(workerId, i);
+                    }
+                }
+                else
+                {
+                    for (int i = from; i < to; i++)
+                    {
+                        int workerId = ScheduleList[i];
+                        RemoveFromSalary(workerId, i + 1);
+                        AddToSalary(workerId, i);
+                    }
+                }
+            }
+        }
         /****************************************************************************************************************/
         /// <summary>
         /// Funkcja zwraca nr zmiany na podstawie pozycji w grafiku. Zmiany numerowane są od 0 (dlatego, że takiej numeracji w pierwotnej wersji oczekiwała
@@ -261,10 +295,23 @@ namespace Grafik_test.ScheduleLogic
         /// <param name="workerId">id pracownika</param>
         /// <param name="currentPosition">pozycja od której liczymy ostatnie wystąpienie</param>
         /// <returns></returns>
-        private static int GetLastPositionInList(List<int> schedule, int workerId, int currentPosition)
+        private int GetLastPositionInList(int workerId, int currentPosition)
         {
-            return schedule.FindLastIndex(currentPosition, w => w == workerId);
+            if (currentPosition > 0)
+                return ScheduleList.FindLastIndex(currentPosition - 1, w => w == workerId);
+            else
+                return -1;
+
         }
+
+        private int GetNextPositionInList(int workerId, int currentPosition)
+        {
+            if (currentPosition < ScheduleList.Count)
+                return ScheduleList.FindIndex(currentPosition + 1, w => w == workerId);
+            else
+                return -1;
+        }
+
         /// <summary>
         /// Zwraca przerwę (w godzinach) między dwomoa pozycjami na liście.
         /// 
@@ -286,15 +333,31 @@ namespace Grafik_test.ScheduleLogic
         /// <param name="workerId"></param>
         /// <param name="currentPosition"></param>
         /// <returns></returns>
-        private int GetLastBreakLength(List<int> schedule, int workerId, int currentPosition)
+        private int GetLastBreakLength(int workerId, int currentPosition)
         {
-            int lastShift = GetLastPositionInList(schedule, workerId, currentPosition);
+            int lastShift = GetLastPositionInList(workerId, currentPosition);
             if (lastShift == -1)
             {
                 return _minimumBreak;
             }
 
             return GetBreakBetweenPositions(currentPosition, lastShift);
+        }
+
+        private int GetNextBreakLength(int workerId, int currentPosition)
+        {
+            int lastShift = GetNextPositionInList(workerId, currentPosition);
+            if (lastShift == -1)
+            {
+                return _minimumBreak;
+            }
+
+            return GetBreakBetweenPositions(currentPosition, lastShift);
+        }
+
+        private bool IsPositionPossible(int workerId, int newPosition)
+        {
+            return (GetLastBreakLength(workerId, newPosition) >= _minimumBreak) && (GetNextBreakLength(workerId, newPosition) >= _minimumBreak);
         }
 
         /************* SALARY ****************************/
@@ -369,7 +432,7 @@ namespace Grafik_test.ScheduleLogic
         /// Zwraca id pracownika z największą pensją w słowniku.
         /// </summary>
         /// <returns></returns>
-        private int WorkerWithMaxSalary()
+        public int WorkerWithMaxSalary()
         {
             var richestWorkers = SalaryPerWorker.Where(x => x.Value == SalaryPerWorker.Max(v => v.Value));
             return richestWorkers.FirstOrDefault().Key;
@@ -379,7 +442,7 @@ namespace Grafik_test.ScheduleLogic
         /// Zwraca id pracownika z najmniejszą pensją w słowniku.
         /// </summary>
         /// <returns></returns>
-        private int WorkerWithMinSalary()
+        public int WorkerWithMinSalary()
         {
             var poorestWorkers = SalaryPerWorker.Where(x => x.Value == SalaryPerWorker.Min(v => v.Value));
             return poorestWorkers.FirstOrDefault().Key;
@@ -389,7 +452,7 @@ namespace Grafik_test.ScheduleLogic
         /// Zwraca różnice między największą i najmniejszą pensją
         /// </summary>
         /// <returns></returns>
-        private float GetDifferenceMinMaxSalary()
+        public float GetDifferenceMinMaxSalary()
         {
             return SalaryPerWorker[WorkerWithMaxSalary()] - SalaryPerWorker[WorkerWithMinSalary()];
         }
@@ -399,7 +462,7 @@ namespace Grafik_test.ScheduleLogic
         {
             ScheduleTable = new Shift[NumberOfShifts];
             int j = 0;
-            for (int i=0; i < NumberOfShifts; i++)
+            for (int i = 0; i < NumberOfShifts; i++)
             {
                 ScheduleTable[i].SetFirstWorker(ScheduleList[j]);
                 ScheduleTable[i].SetSecondWorker(ScheduleList[j + 1]);
