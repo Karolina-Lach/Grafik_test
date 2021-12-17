@@ -1,0 +1,58 @@
+﻿@model Grafik_test.Models.ViewModels.ScheduleVM
+
+<link href="~/css/table.css" rel="Stylesheet" type="text/css" />
+
+<table class="tg">
+    <thead>
+        <tr>
+            <th class="tg-7btt"></th>
+            @for (int i = 1; i <= Model.Schedule.Month.NumberOfDays; i++)
+            {
+                <th class="tg-7btt">@i</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @for (int k = 0; k < Model.Schedule.ShiftsPerDay; k++)
+        {
+
+            <tr>
+                <td class="tg-r1e8">@(k+1)</td>
+                @for (int i = 1; i <= Model.Schedule.Month.NumberOfDays; i++)
+                {
+                    int shiftIndex = (Model.Schedule.ShiftsPerDay * (i - 1) + k);
+                    @if (!Model.Schedule.IsDayHoliday(i))
+                    {
+                        <td class="tg-9wq8"> @Model.Schedule.ScheduleTable[shiftIndex].FirstWorker</td>
+                    }
+                    else
+                    {
+
+                        <td style="background-color:aliceblue" class="tg-9wq8"> @Model.Schedule.ScheduleTable[shiftIndex].FirstWorker</td>
+                    }
+
+
+                }
+
+            </tr>
+            <tr>
+                <td class="tg-r1e8">@(k+1)</td>
+                @for (int i = 1; i <= Model.Schedule.Month.NumberOfDays; i++)
+                {
+                    int shiftIndex = (Model.Schedule.ShiftsPerDay * (i - 1) + k);
+                    @if (!Model.Schedule.IsDayHoliday(i))
+                    {
+                        <td class="tg-9wq8"> @Model.Schedule.ScheduleTable[shiftIndex].SecondWorker</td>
+                    }
+                    else
+                    {
+                        <td style="background-color:aliceblue" class="tg-9wq8">@Model.Schedule.ScheduleTable[shiftIndex].SecondWorker</td>
+                    }
+
+                }
+
+            </tr>
+
+        }
+    </tbody>
+</table>

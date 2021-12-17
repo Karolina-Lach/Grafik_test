@@ -14,7 +14,6 @@ namespace Grafik_test.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options):base(options)
         {
         }
-        public DbSet<Test2> Tests_2 { get; set; }
         public DbSet<Test> Tests { get; set; }
     }
 }

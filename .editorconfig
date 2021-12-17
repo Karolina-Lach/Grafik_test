@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# CA1041: Określ komunikat dla atrybutu ObsoleteAttribute
+dotnet_diagnostic.CA1041.severity = none
