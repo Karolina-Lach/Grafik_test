@@ -121,13 +121,15 @@ namespace Grafik_test.ScheduleLogic
             {
                 if (wage.IsHoliday)
                 {
+                    wage.WagePerHour = 60.0f;
                     _wagePerHolidayHour = wage.WagePerHour;
-                    _salaryPerShiftHoliday = _wagePerHolidayHour * ShiftsPerDay;
+                    _salaryPerShiftHoliday = _wagePerHolidayHour * 8;
                 }
                 else
                 {
+                    wage.WagePerHour = 30.0f;
                     _wagePerHour = wage.WagePerHour;
-                    _salaryPerShift = _wagePerHour * ShiftsPerDay;
+                    _salaryPerShift = _wagePerHour * 8;
                 }
             }
         }
@@ -175,9 +177,47 @@ namespace Grafik_test.ScheduleLogic
             }
 
             UpdateSalaryDictionary(scheduleList);
+
             return scheduleList;
         }
 
+        private void ChangeSchedulePosition(int positionInList1, int positionInList2)
+        {
+            int temp = ScheduleList[positionInList1];
+            ScheduleList[positionInList1] = ScheduleList[positionInList2];
+            ScheduleList[positionInList2] = temp;
+            UpdateSalaryDictionary(ScheduleList);
+        }
+
+        private void ChangeSchedules()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                int fisrtWorker = SalaryPerWorker.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
+                int secondWorker = SalaryPerWorker.Aggregate((x, y) => x.Value < y.Value ? x : y).Key;
+                List<int> firstWorkerSchedule = GetWorkerSchedule(fisrtWorker);
+                List<int> secondWorkerSchedule = GetWorkerSchedule(secondWorker);
+                var random = new Random();
+                int positionIdx1 = random.Next(firstWorkerSchedule.Count);
+                int positionIdx2 = random.Next(secondWorkerSchedule.Count);
+                ChangeSchedulePosition(firstWorkerSchedule[positionIdx1], secondWorkerSchedule[positionIdx2]);
+            }
+               
+        }
+
+
+        private List<int> GetWorkerSchedule(int worker)
+        {
+            List<int> workerSchedule = new List<int>();
+            for (int i = 0; i < ScheduleList.Count; i++)
+            {
+                if (ScheduleList[i] == worker)
+                {
+                    workerSchedule.Add(i);
+                }
+            }
+            return workerSchedule;
+        }
 
         /****************************************************************************************************************/
         /// <summary>
