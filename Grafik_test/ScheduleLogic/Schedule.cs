@@ -156,6 +156,8 @@ namespace Grafik_test.ScheduleLogic
             int from = rnd.Next(0, ScheduleList.Count);
             int to = rnd.Next(0, ScheduleList.Count);
             InsertWorker(from, to);
+            
+            ChangeSchedules();
 
             return CreateShiftArrayFromList();
         }
@@ -181,6 +183,46 @@ namespace Grafik_test.ScheduleLogic
             UpdateSalaryDictionary(scheduleList);
             return scheduleList;
         }
+        
+        private void ChangeSchedulePosition(int positionInList1, int positionInList2)
+        {
+            int temp = ScheduleList[positionInList1];
+            ScheduleList[positionInList1] = ScheduleList[positionInList2];
+            ScheduleList[positionInList2] = temp;
+            UpdateSalaryDictionary(ScheduleList);
+        }
+
+        private void ChangeSchedules()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                int fisrtWorker = SalaryPerWorker.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
+                int secondWorker = SalaryPerWorker.Aggregate((x, y) => x.Value < y.Value ? x : y).Key;
+                List<int> firstWorkerSchedule = GetWorkerSchedule(fisrtWorker);
+                List<int> secondWorkerSchedule = GetWorkerSchedule(secondWorker);
+                var random = new Random();
+                int positionIdx1 = random.Next(firstWorkerSchedule.Count);
+                int positionIdx2 = random.Next(secondWorkerSchedule.Count);
+                ChangeSchedulePosition(firstWorkerSchedule[positionIdx1], secondWorkerSchedule[positionIdx2]);
+            }
+               
+        }
+
+
+        private List<int> GetWorkerSchedule(int worker)
+        {
+            List<int> workerSchedule = new List<int>();
+            for (int i = 0; i < ScheduleList.Count; i++)
+            {
+                if (ScheduleList[i] == worker)
+                {
+                    workerSchedule.Add(i);
+                }
+            }
+            return workerSchedule;
+        }
+        
+        
 
         private void InsertWorker(int from, int to)
         {
