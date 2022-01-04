@@ -232,6 +232,7 @@ namespace Grafik_test.ScheduleLogic
         {
             int tempElement = ScheduleList[from];
             if (IsPositionPossible(tempElement, to)) {
+
                 ScheduleList.RemoveAt(from);
                 ScheduleList.Insert(to, tempElement);
 
