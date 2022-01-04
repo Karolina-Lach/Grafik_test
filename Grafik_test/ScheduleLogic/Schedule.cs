@@ -83,7 +83,7 @@ namespace Grafik_test.ScheduleLogic
         /// List z id dla wszystkich pracowników
         /// </summary>
         public List<int> Workers;
-
+        Random rnd = new Random();
         /************ CONSTRUCTORS *************************************************************************/
 
         [Obsolete]
@@ -153,9 +153,6 @@ namespace Grafik_test.ScheduleLogic
             /*
                 Manipulowanie grafikiem tak żeby było lepiej...
             */
-            //int from = rnd.Next(0, ScheduleList.Count);
-            //int to = rnd.Next(0, ScheduleList.Count);
-            //InsertWorker(from, to);
 
             ChangeSchedules();
 
@@ -171,45 +168,94 @@ namespace Grafik_test.ScheduleLogic
         private List<int> InitSchedule()
         {
 
+            //int numberOfPositions = NumberOfShifts * _workersPerShift;
+
+            //int listSize = (int)Math.Ceiling(Convert.ToDecimal(numberOfPositions) / Convert.ToDecimal(NumberOfAvailableWorkers));
+            //List<int> scheduleList = new List<int>(listSize);
+            //for (int i = 0; i < listSize; i++)
+            //{
+            //    scheduleList.AddRange(Workers);
+            //}
+
+            Random rnd = new Random();
+
             int numberOfPositions = NumberOfShifts * _workersPerShift;
 
             int listSize = (int)Math.Ceiling(Convert.ToDecimal(numberOfPositions) / Convert.ToDecimal(NumberOfAvailableWorkers));
             List<int> scheduleList = new List<int>(listSize);
             for (int i = 0; i < listSize; i++)
             {
-                scheduleList.AddRange(Workers);
+                var workers = new List<int>(Workers);
+                while (workers.Count > 0)
+                {
+                    int index = rnd.Next(0, workers.Count);
+                    int workerId = workers[index];
+                    scheduleList.Add(workerId);
+                    workers.RemoveAt(index);
+                }
             }
+
 
             UpdateSalaryDictionary(scheduleList);
             return scheduleList;
         }
-        
-        private void ChangeSchedulePosition(int positionInList1, int positionInList2)
+
+        private Tuple<int,int> ChangeSchedulePosition(int numberOfInserts, int numberOfSwitches)
         {
-            int temp = ScheduleList[positionInList1];
-            ScheduleList[positionInList1] = ScheduleList[positionInList2];
-            ScheduleList[positionInList2] = temp;
+            
+            int from = rnd.Next(0, ScheduleList.Count);
+            int to = rnd.Next(0, ScheduleList.Count);
+            bool wasInsertPossible = InsertWorker(from, to);
+            if(!wasInsertPossible)
+            {
+                bool wasSwitchPossible = SwitchWorkers(from, to);
+                if (wasSwitchPossible)
+                {
+                    numberOfSwitches++;
+                }
+            } else
+            {
+                numberOfInserts++;
+            }
             UpdateSalaryDictionary(ScheduleList);
+
+            return Tuple.Create(numberOfInserts, numberOfSwitches);
         }
+
+        private bool SwitchWorkers(int positionInList1, int positionInList2)
+        {
+            bool isPositionPossible = false;
+            if(IsPositionPossible(ScheduleList[positionInList1], positionInList2) && 
+                IsPositionPossible(ScheduleList[positionInList2], positionInList1))
+            {
+                isPositionPossible = true;
+                int temp = ScheduleList[positionInList1];
+                ScheduleList[positionInList1] = ScheduleList[positionInList2];
+                ScheduleList[positionInList2] = temp;
+            }
+
+            return isPositionPossible;
+        }
+
+
 
         private void ChangeSchedules()
         {
-            
-            for (int i = 0; i < 10; i++)
+            int numberOfInserts = 0, numberOfSwitches = 0;
+            float bestDifference = 10000.0f;
+            List<int> bestScheduleList = new List<int>();
+            for (int i = 0; i < 10000; i++)
             {
-
-                int fisrtWorker = SalaryPerWorker.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
-                int secondWorker = SalaryPerWorker.Aggregate((x, y) => x.Value < y.Value ? x : y).Key;
-                List<int> firstWorkerSchedule = GetWorkerSchedule(fisrtWorker);
-                List<int> secondWorkerSchedule = GetWorkerSchedule(secondWorker);
-                var random = new Random();
-                int positionIdx1 = random.Next(firstWorkerSchedule.Count);
-                int positionIdx2 = random.Next(secondWorkerSchedule.Count);
-
-                
-                ChangeSchedulePosition(firstWorkerSchedule[positionIdx1], secondWorkerSchedule[positionIdx2]);
+                (numberOfInserts, numberOfSwitches) = ChangeSchedulePosition(numberOfInserts, numberOfSwitches);
+                float currentDifference = GetDifferenceMinMaxSalary();
+                if (currentDifference <= bestDifference)
+                {
+                    bestDifference = currentDifference;
+                    bestScheduleList = new List<int>(ScheduleList);
+                }
             }
-               
+            ScheduleList = bestScheduleList;
+            UpdateSalaryDictionary(ScheduleList);
         }
 
 
@@ -225,27 +271,26 @@ namespace Grafik_test.ScheduleLogic
             }
             return workerSchedule;
         }
-        
-        
 
-        private void InsertWorker(int from, int to)
+
+
+        public bool InsertWorker(int from, int to)
         {
             int tempElement = ScheduleList[from];
-            if (IsPositionPossible(tempElement, to)) {
-
-                ScheduleList.RemoveAt(from);
-                ScheduleList.Insert(to, tempElement);
-
-                AddToSalary(tempElement, to);
-                RemoveFromSalary(tempElement, from);
-
+            bool isChangePossible = true;
+            if (IsPositionPossible(tempElement, to))
+            {
+                Insert(from, to, tempElement);
                 if (from > to)
                 {
                     for (int i = to + 1; i <= from; i++)
                     {
                         int workerId = ScheduleList[i];
-                        RemoveFromSalary(workerId, i - 1);
-                        AddToSalary(workerId, i);
+                        if (!IsPositionPossible(workerId, i))
+                        {
+                            isChangePossible = false;
+                            break;
+                        }
                     }
                 }
                 else
@@ -253,11 +298,50 @@ namespace Grafik_test.ScheduleLogic
                     for (int i = from; i < to; i++)
                     {
                         int workerId = ScheduleList[i];
-                        RemoveFromSalary(workerId, i + 1);
-                        AddToSalary(workerId, i);
+                        if (!IsPositionPossible(workerId, i))
+                        {
+                            isChangePossible = false;
+                            break;
+                        }
                     }
                 }
+                if (!isChangePossible)
+                {
+                    Insert(to, from, tempElement);
+                }
+                else
+                {
+                    //AddToSalary(tempElement, to);
+                    //RemoveFromSalary(tempElement, from);
+
+                    //if (from > to)
+                    //{
+                    //    for (int i = to + 1; i <= from; i++)
+                    //    {
+                    //        int workerId = ScheduleList[i];
+                    //        RemoveFromSalary(workerId, i - 1);
+                    //        AddToSalary(workerId, i);
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    for (int i = from; i < to; i++)
+                    //    {
+                    //        int workerId = ScheduleList[i];
+                    //        RemoveFromSalary(workerId, i + 1);
+                    //        AddToSalary(workerId, i);
+                    //    }
+                    //}
+                }
             }
+
+            return isChangePossible;
+        }
+
+        private void Insert(int from, int to, int value)
+        {
+            ScheduleList.RemoveAt(from);
+            ScheduleList.Insert(to, value);
         }
         /****************************************************************************************************************/
         /// <summary>
@@ -369,7 +453,9 @@ namespace Grafik_test.ScheduleLogic
         /// <returns></returns>
         private int GetBreakBetweenPositions(int position1, int position2)
         {
-            return (Math.Abs(position1 - position2) - 1) * (24 / ShiftsPerDay);
+            int firstShift = GetShiftNumber(position1);
+            int secondShift = GetShiftNumber(position2);
+            return (Math.Abs(value: firstShift - secondShift) - 1) * (24 / ShiftsPerDay);
         }
 
         /// <summary>
@@ -403,7 +489,9 @@ namespace Grafik_test.ScheduleLogic
 
         private bool IsPositionPossible(int workerId, int newPosition)
         {
-            return (GetLastBreakLength(workerId, newPosition) >= _minimumBreak) && (GetNextBreakLength(workerId, newPosition) >= _minimumBreak);
+            int lastBreakLength = GetLastBreakLength(workerId, newPosition);
+            int nextBreakLength = GetNextBreakLength(workerId, newPosition);
+            return (lastBreakLength >= _minimumBreak) && (nextBreakLength >= _minimumBreak);
         }
 
         /************* SALARY ****************************/

@@ -23,11 +23,10 @@
                     int shiftIndex = (Model.Schedule.ShiftsPerDay * (i - 1) + k);
                     @if (!Model.Schedule.IsDayHoliday(i))
                     {
-                        <td class="tg-9wq8"> @Model.Schedule.ScheduleTable[shiftIndex].FirstWorker</td>
+                         <td class="tg-9wq8"> @Model.Schedule.ScheduleTable[shiftIndex].FirstWorker </td>
                     }
                     else
                     {
-
                         <td style="background-color:aliceblue" class="tg-9wq8"> @Model.Schedule.ScheduleTable[shiftIndex].FirstWorker</td>
                     }
 

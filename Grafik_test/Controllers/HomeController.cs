@@ -43,18 +43,18 @@ namespace Grafik_test.Controllers
             //List<Wage> wages = _db.Set<Wage>().ToList();
             List<Worker> workers = new List<Worker>
             {
-                new Worker(1, "A", "Aa"),
-                new Worker(2, "B", "Bb"),
-                new Worker(3, "C", "Cc"),
-                new Worker(4, "D", "Dd"),
-                new Worker(5, "E", "Ee"),
-                new Worker(6, "F", "Ff"),
-                new Worker(7, "G", "Gg"),
-                new Worker(8, "H", "Hh"),
-                new Worker(9, "I", "Ii"),
-                new Worker(10, "J", "Jj"),
-                new Worker(11, "K", "Kk"),
-                new Worker(12, "L", "Ll")
+                new Worker(1, "Fabian", "Wasilewski"),
+                new Worker(2, "Czesław", "Chmielewski"),
+                new Worker(3, "Kajetan", "Kaźmierczak"),
+                new Worker(4, "Amadeusz", "Jaworski"),
+                new Worker(5, "Diego", "Kubiak"),
+                new Worker(6, "Jędrzej", "Szczepański"),
+                new Worker(7, "Antoni", "Malinowski"),
+                new Worker(8, "Fabian", "Czerwiński"),
+                new Worker(9, "Emil", "Sokołowski"),
+                new Worker(10, "Alexander", "Zieliński"),
+                new Worker(11, "Dominik", "Bąk"),
+                new Worker(12, "Aureliusz", "Sadowski")
             };
 
             List<Wage> wages = new List<Wage>
