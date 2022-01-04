@@ -153,10 +153,7 @@ namespace Grafik_test.ScheduleLogic
             /*
                 Manipulowanie grafikiem tak żeby było lepiej...
             */
-            //int from = rnd.Next(0, ScheduleList.Count);
-            //int to = rnd.Next(0, ScheduleList.Count);
-            //InsertWorker(from, to);
-
+          
             ChangeSchedules();
 
             return CreateShiftArrayFromList();
@@ -184,32 +181,32 @@ namespace Grafik_test.ScheduleLogic
             return scheduleList;
         }
         
-        private void ChangeSchedulePosition(int positionInList1, int positionInList2)
+        private void ChangeSchedulePosition()
         {
-            int temp = ScheduleList[positionInList1];
-            ScheduleList[positionInList1] = ScheduleList[positionInList2];
-            ScheduleList[positionInList2] = temp;
-            UpdateSalaryDictionary(ScheduleList);
+            Random rnd = new Random();
+            int from = rnd.Next(0, ScheduleList.Count);
+            int to = rnd.Next(0, ScheduleList.Count);
+            InsertWorker(from, to);
+            //UpdateSalaryDictionary(ScheduleList);
         }
+
 
         private void ChangeSchedules()
         {
-            
-            for (int i = 0; i < 10; i++)
+            float bestDifference = 10000.0f;
+            List<int> bestScheduleList = new List<int>();
+            for (int i = 0; i < 10000; i++)
             {
-
-                int fisrtWorker = SalaryPerWorker.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
-                int secondWorker = SalaryPerWorker.Aggregate((x, y) => x.Value < y.Value ? x : y).Key;
-                List<int> firstWorkerSchedule = GetWorkerSchedule(fisrtWorker);
-                List<int> secondWorkerSchedule = GetWorkerSchedule(secondWorker);
-                var random = new Random();
-                int positionIdx1 = random.Next(firstWorkerSchedule.Count);
-                int positionIdx2 = random.Next(secondWorkerSchedule.Count);
-
-                
-                ChangeSchedulePosition(firstWorkerSchedule[positionIdx1], secondWorkerSchedule[positionIdx2]);
-            }
-               
+                ChangeSchedulePosition();
+                float currentDifference = GetDifferenceMinMaxSalary();
+                if(currentDifference <= bestDifference)
+                {
+                    bestDifference = currentDifference;
+                    bestScheduleList = new List<int>(ScheduleList);
+                }
+            }   
+            ScheduleList = bestScheduleList;
+            UpdateSalaryDictionary(ScheduleList);
         }
 
 
