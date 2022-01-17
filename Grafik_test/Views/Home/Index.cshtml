@@ -1,4 +1,5 @@
-﻿@model Grafik_test.Models.ViewModels.ScheduleVM
+﻿@using System.Collections.Generic;
+@model Grafik_test.Models.ViewModels.ScheduleVM
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -13,38 +14,39 @@
                 <h3 class="text-primary">@title</h3>
             </div>
         </div>
-        <div class="col-6 pt-4">
-            <div class="form-group row">
-                <div class="col-2">
-                    <label>Miesiąc</label>
+        <div class="col-12 pt-4">
+            <div class="row">
+                <div class="col-4">
+                    <label style="font-size:20px">Miesiąc</label>
+                    @*<select class="custom-select" asp-items="Model.MonthList" id="idMonth" name="month"><option value="@System.DateTime.Today.Month">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.MonthNames[@System.DateTime.Today.Month - 1]</option></select>*@
+                    <select class="custom-select" asp-items="Model.MonthList" id="idMonth" name="month"><option value="@Model.DefaultMonth.Value">@Model.DefaultMonth.Text</option></select>
                 </div>
-                <div class="col-3">
-                    <select asp-items="Model.MonthList" id="idMonth" name="month"><option value="@System.DateTime.Today.Month">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.MonthNames[@System.DateTime.Today.Month - 1]</option></select>
+                <div class="col-4">
+                    <label style="font-size:20px">Rok</label>
+                    <select class="custom-select" asp-items="Model.YearList" id="idYear" name="year"><option>@System.DateTime.Today.Year</option></select>
                 </div>
-                <div class="col-1">
-                    <label>Rok</label>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-4">
+                    <label>Liczba zmian</label>
+                    <input type="text" value="3" name="numberOfShifts" id="numberOfShifts" readonly />
                 </div>
-                <div class="col-3">
-                    <select asp-items="Model.YearList" id="idYear" name="year"><option>@System.DateTime.Today.Year</option></select>
+                <div class="col-4">
+                    <label>Przerwa między zmianami [godziny]</label>
+                    <input type="text" value="11" name="minBreak" id="minBreak" readonly />
                 </div>
-
-                <div class="col-3">
-                    <div class="row">
-                        <label>Liczba zmian</label>
-                        <input type="text" value="3" name="numberOfShifts" id="numberOfShifts" readonly />
-                    </div>
-                    <div class="row">
-                        <label>Przerwa między zmianami</label>
-                        <input type="text" value="11" name="minBreak" id="minBreak" readonly />
-                    </div>
-                    <div class="row">
-                        <label>Weekend</label>
-                        <input type="text" value="35" name="minWeekend" id="minWeekend" readonly />
-                    </div>
+                <div class="col-4">
+                    <label>Weekend [godziny]</label>
+                    <input type="text" value="35" name="minWeekend" id="minWeekend" readonly />
                 </div>
             </div>
 
+
         </div>
+
+
+
         <div class="col-8 pt-4">
             <div class="form-group row">
                 <div class="col-4">
@@ -54,9 +56,8 @@
 
         </div>
     </div>
-
-
 </form>
+
 
 @if (ViewBag.Name != null)
 {
@@ -64,10 +65,125 @@
     <h3>@ViewBag.Name</h3>
     <br />
 
-    <p>Maksymalna pensja: @Model.Schedule.SalaryPerWorker.Max(v => v.Value) dla @Model.Schedule.WorkerWithMaxSalary()</p>
-    <p>Minimalna pensja: @Model.Schedule.SalaryPerWorker.Min(v => v.Value) dla @Model.Schedule.WorkerWithMinSalary()</p>
-    @*<partial name="_ScheduleTable" model="Model" />*@
-    <partial name="_SimpleScheduleTable" model="Model" />
+
+    <ul class="nav nav-tabs">
+        <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#short">Skrót</a></li>
+        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#all">Cały grafik</a></li>
+        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#info">Szczegóły</a></li>
+    </ul>
+
+    <div class="tab-content">
+        @* SKRÓT *@
+        <div id="short" class="tab-pane active" style="padding-right:20px">
+            <br />
+            <partial name="_SimpleScheduleTableNames" model="Model" />
+        </div>
+
+        @* WSZYSTKO *@
+        <div class="tab-pane fade" id="all">
+            <br />
+            <div class="col-4">
+                <select class="custom-select" asp-items="@Model.WorkerList" id="workersList" name="month">
+                    <option value="0">
+                        Wszystko
+                    </option>
+                </select>
+            </div>
+
+            <br />
+            <div id="0">
+
+                <partial name="_ScheduleTable" model="Model" />
+            </div>
+
+
+            @foreach (var worker in Model.Workers)
+            {
+                <div id="@worker.Id" style="display:none">
+                    @{
+                        Grafik_test.Models.ViewModels.ScheduleOneWorkerVM workerScheduleVM = new Grafik_test.Models.ViewModels.ScheduleOneWorkerVM(Model.Schedule, worker);
+                    }
+                    <partial name="_ScheduleTableOneWorker" model="workerScheduleVM" />
+                </div>
+            }
+
+        </div>
+        <div class="tab-pane fade" id="info">
+            <br />
+            <div class="row">
+                <div class="col-6 pt-4">
+                    @{string maxWorker = Model.Workers[Model.Schedule.WorkerWithMaxSalary()].Name + " " + Model.Workers[Model.Schedule.WorkerWithMaxSalary()].LastName;}
+                    @{string minWorker = Model.Workers[Model.Schedule.WorkerWithMinSalary()].Name + " " + Model.Workers[Model.Schedule.WorkerWithMinSalary()].LastName;}
+                    <p>Maksymalna pensja: @Model.Schedule.SalaryPerWorker.Max(v => v.Value) dla @maxWorker</p>
+                    <p>Minimalna pensja: @Model.Schedule.SalaryPerWorker.Min(v => v.Value) dla @minWorker</p>
+                </div>
+                <div class="col-6 pt-4">
+                    @{maxWorker = @Model.Workers[@Model.Schedule.WorkerWithMaxWeekends()].Name + " " + @Model.Workers[@Model.Schedule.WorkerWithMaxWeekends()].LastName;}
+                    @{minWorker = @Model.Workers[@Model.Schedule.WorkerWithMinWeekends()].Name + " " + @Model.Workers[@Model.Schedule.WorkerWithMinWeekends()].LastName;}
+                    <p>Maksymalna liczba weekendów: @Model.Schedule.WeekendsPerWorker.Max(v => v.Value) dla @maxWorker</p>
+                    <p>Minimalna liczba weekendów: @Model.Schedule.WeekendsPerWorker.Min(v => v.Value) dla @minWorker</p>
+                </div>
+            </div>
+            <br />
+            <table class="tg">
+                <thead>
+                    <tr>
+                        <th class="tg-7btt">Pracownik</th>
+                        <th class="tg-7btt">Zmiany w tygodniu</th>
+                        <th class="tg-7btt">Zmiany w weekendy/święta</th>
+                        <th class="tg-7btt">Wszystkie zmiany</th>
+                        <th class="tg-7btt">Pensja</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var worker in Model.Workers)
+                    {
+                        int allShifts = Model.Schedule.GetWorkerShifts(worker.Id);
+                        int weekendShifts = Model.Schedule.GetWorkerShiftsWeekends(worker.Id);
+                        int regularShifts = allShifts - weekendShifts;
+                        <tr>
+                            <td>@worker.Name @worker.LastName</td>
+                            <td>@regularShifts</td>
+                            <td>@weekendShifts</td>
+                            <td>@allShifts</td>
+                            <td>@Model.Schedule.SalaryPerWorker[worker.Id]</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 }
 
+
+
+@section Scripts{
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#workersList').change(function () {
+                var worker = $('#workersList').val();
+                var options = $('#workersList option');
+
+                var values = $.map(options, function (option) {
+                    return option.value;
+                });
+
+                values.forEach(item => $("#" + item).hide());
+                $("#" + worker).show();
+            });
+        });
+    </script>
+    <script>
+        $(function () {
+            $('.nav-tabs a[href=#short]').tab('show');
+        });
+
+        $('.nav-tabs a').click(function (e) {
+            e.preventDefault()
+            $(this).tab('show')
+        })
+    </script>
+
+}
 
