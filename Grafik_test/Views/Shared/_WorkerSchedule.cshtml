@@ -1,42 +1,41 @@
 ﻿@model Grafik_test.Models.ViewModels.WorkerScheduleVM
 
-@for (int j = 0; j < Model.Schedule.ShiftsPerDay; j++)
-{
-    <tr>
-        @if (j == 0)
-        {
-            <td class="tg-r1e8" rowspan="3">@Model.Worker.Name @Model.Worker.LastName</td>
-        }
-
-        @for (int i = 1; i <= Model.Schedule.Month.NumberOfDays; i++)
-        {
-            int shiftIndex = (i - 1) * Model.Schedule.ShiftsPerDay + j;
-            @if (Model.Schedule.ScheduleTable[shiftIndex].FirstWorker == Model.Worker.Id ||
-         Model.Schedule.ScheduleTable[shiftIndex].SecondWorker == Model.Worker.Id)
+    @for (int j = 0; j < Model.Schedule.ShiftsPerDay; j++)
+    {
+        <tr>
+            @if (j == 0)
             {
-                @if (!Model.Schedule.IsDayHoliday(i))
+                <td class="tg-r1e8" rowspan="3">@Model.Worker.Name @Model.Worker.LastName</td>
+            }
+
+            @for (int i = 1; i <= Model.Schedule.Month.NumberOfDays; i++)
+            {
+                int shiftIndex = (i - 1) * Model.Schedule.ShiftsPerDay + j;
+                @if (Model.Schedule.ScheduleTable[shiftIndex].FirstWorker == Model.Worker.Id ||
+            Model.Schedule.ScheduleTable[shiftIndex].SecondWorker == Model.Worker.Id)
                 {
-                    <td class="tg-9wq8">X</td>
+                    @if (!Model.Schedule.IsDayHoliday(i))
+                    {
+                        <td class="tg-9wq8">X</td>
+                    }
+                    else
+                    {
+                        <td style="background-color:aliceblue" class="tg-9wq8">X</td>
+                    }
+
                 }
                 else
                 {
-                    <td style="background-color:aliceblue" class="tg-9wq8">X</td>
+                    @if (!Model.Schedule.IsDayHoliday(i))
+                    {
+                        <td class="tg-9wq8"></td>
+                    }
+                    else
+                    {
+                        <td style="background-color: aliceblue" class="tg-9wq8"></td>
+                    }
                 }
 
             }
-            else
-            {
-                @if (!Model.Schedule.IsDayHoliday(i))
-                {
-                    <td class="tg-9wq8"></td>
-                }
-                else
-                {
-                    <td style="background-color: aliceblue" class="tg-9wq8"></td>
-                }
-            }
-
-        }
-    </tr>
-}
-
+        </tr>
+    }

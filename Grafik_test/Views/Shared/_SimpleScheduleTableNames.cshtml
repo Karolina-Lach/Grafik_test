@@ -23,15 +23,15 @@
                     int shiftIndex = (Model.Schedule.ShiftsPerDay * (i - 1) + k);
                     @if (!Model.Schedule.IsDayHoliday(i))
                     {
-                        string name_sub = (Model.Workers[Model.Schedule.ScheduleTable[shiftIndex].FirstWorker - 1].Name).Substring(0,2);
-                        string lastname_sub = (Model.Workers[Model.Schedule.ScheduleTable[shiftIndex].FirstWorker - 1].LastName).Substring(0, 2);
+                        string name_sub = (Model.Workers[Model.Schedule.ScheduleTable[shiftIndex].FirstWorker - 1].Name).Substring(0,1);
+                        string lastname_sub = (Model.Workers[Model.Schedule.ScheduleTable[shiftIndex].FirstWorker - 1].LastName).Substring(0, 1);
                         string initials = String.Concat(name_sub, lastname_sub);
                         <td class="tg-9wq8"> @initials </td>
                     }
                     else
                     {
-                        string name_sub = (Model.Workers[Model.Schedule.ScheduleTable[shiftIndex].FirstWorker - 1].Name).Substring(0,2);
-                        string lastname_sub = (Model.Workers[Model.Schedule.ScheduleTable[shiftIndex].FirstWorker - 1].LastName).Substring(0, 2);
+                        string name_sub = (Model.Workers[Model.Schedule.ScheduleTable[shiftIndex].FirstWorker - 1].Name).Substring(0,1);
+                        string lastname_sub = (Model.Workers[Model.Schedule.ScheduleTable[shiftIndex].FirstWorker - 1].LastName).Substring(0, 1);
                         string initials = String.Concat(name_sub, lastname_sub);
                         <td style="background-color:aliceblue" class="tg-9wq8"> @initials </td>
                     }
@@ -48,15 +48,15 @@
                     @if (!Model.Schedule.IsDayHoliday(i))
 
                     {
-                        string name_sub = (Model.Workers[Model.Schedule.ScheduleTable[shiftIndex].SecondWorker - 1].Name).Substring(0, 2);
-                        string lastname_sub = (Model.Workers[Model.Schedule.ScheduleTable[shiftIndex].SecondWorker - 1].LastName).Substring(0, 2);
+                        string name_sub = (Model.Workers[Model.Schedule.ScheduleTable[shiftIndex].SecondWorker - 1].Name).Substring(0, 1);
+                        string lastname_sub = (Model.Workers[Model.Schedule.ScheduleTable[shiftIndex].SecondWorker - 1].LastName).Substring(0, 1);
                         string initials = String.Concat(name_sub, lastname_sub);
                         <td class="tg-9wq8"> @initials </td>
                     }
                     else
                     {
-                        string name_sub = (Model.Workers[Model.Schedule.ScheduleTable[shiftIndex].SecondWorker - 1].Name).Substring(0, 2);
-                        string lastname_sub = (Model.Workers[Model.Schedule.ScheduleTable[shiftIndex].SecondWorker - 1].LastName).Substring(0, 2);
+                        string name_sub = (Model.Workers[Model.Schedule.ScheduleTable[shiftIndex].SecondWorker - 1].Name).Substring(0, 1);
+                        string lastname_sub = (Model.Workers[Model.Schedule.ScheduleTable[shiftIndex].SecondWorker - 1].LastName).Substring(0,1);
                         string initials = String.Concat(name_sub, lastname_sub);
                         <td style="background-color:aliceblue" class="tg-9wq8">@initials</td>
                     }

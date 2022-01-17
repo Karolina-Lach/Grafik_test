@@ -1,0 +1,20 @@
+﻿@model Grafik_test.Models.ViewModels.ScheduleOneWorkerVM
+
+<link href="~/css/table.css" rel="Stylesheet" type="text/css" />
+
+<table class="tg">
+    <thead>
+        <tr>
+            <th class="tg-7btt">Pracownik</th>
+            @for (int i = 1; i <= Model.Schedule.Month.NumberOfDays; i++)
+            {
+                <th class="tg-7btt">@i</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+         @{Grafik_test.Models.ViewModels.WorkerScheduleVM workerScheduleVM = new Grafik_test.Models.ViewModels.WorkerScheduleVM(Model.Schedule, Model.Worker); }
+         <partial name="_WorkerSchedule" model="workerScheduleVM" />
+    </tbody>
+</table>
+
