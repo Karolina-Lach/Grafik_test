@@ -26,12 +26,9 @@ namespace Grafik_test.Controllers
 
         public IActionResult Index()
         {
-            // TODO: wczytanie z pliku
-            List<Wage> wages = new List<Wage>
-            {
-                new Wage(1, 30, false),
-                new Wage(2, 60, true)
-            };
+            List<Wage> wages = new List<Wage>();
+            wages = CreateWagesList();
+
             float weekWagePerHour = wages.First(wage => wage.IsHoliday == false).WagePerHour;
             float weekendWagePerHour = wages.First(wage => wage.IsHoliday == true).WagePerHour;
             return View(new ScheduleVM(weekWagePerHour, weekendWagePerHour));
@@ -45,41 +42,66 @@ namespace Grafik_test.Controllers
             {
                 return View(new ScheduleVM());
             }
-            // TODO: wczytanie z pliku
-            List<Worker> workers = new List<Worker>
-            {
-                new Worker(1, "Fabian", "Wasilewski"),
-                new Worker(2, "Czesław", "Chmielewski"),
-                new Worker(3, "Kajetan", "Kaźmierczak"),
-                new Worker(4, "Amadeusz", "Jaworski"),
-                new Worker(5, "Diego", "Kubiak"),
-                new Worker(6, "Jędrzej", "Szczepański"),
-                new Worker(7, "Antoni", "Malinowski"),
-                new Worker(8, "Fabian", "Czerwiński"),
-                new Worker(9, "Emil", "Sokołowski"),
-                new Worker(10, "Alexander", "Zieliński"),
-                new Worker(11, "Dominik", "Bąk"),
-                new Worker(12, "Aureliusz", "Sadowski")
-            };
-            // TODO: wczytanie z pliku
-            List<Wage> wages = new List<Wage>
-            {
-                new Wage(1, 30, false),
-                new Wage(2, 60, true)
-            };
+            List<Worker> workers = new List<Worker>();
+            workers = CreateListOfWorkers();
 
+            List<Wage> wages = new List<Wage>();
+            wages = CreateWagesList();
+
+            float weekWagePerHour = wages.First(wage => wage.IsHoliday == false).WagePerHour;
+            float weekendWagePerHour = wages.First(wage => wage.IsHoliday == true).WagePerHour;
             ScheduleVM scheduleVM = new ScheduleVM(int.Parse(month), int.Parse(year), workers, wages,
-                int.Parse(numberOfShifts), int.Parse(minBreak), int.Parse(minWeekend));
+                int.Parse(numberOfShifts), int.Parse(minBreak), int.Parse(minWeekend), weekendWagePerHour, weekendWagePerHour);
             scheduleVM.Schedule.CreateSchedule();
             var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(int.Parse(month));
             ViewBag.Name = char.ToUpper(monthName[0]) + monthName[1..] + " " + year;
             return View(scheduleVM);
         }
 
-        public IActionResult Privacy()
+
+        public List<Worker> CreateListOfWorkers()
         {
-            return View();
+
+            string fileWorker = "Data/workers.txt";
+            string line;
+
+            System.IO.StreamReader sr = new System.IO.StreamReader(fileWorker);
+            List<Worker> workers = new List<Worker>();
+
+            while ((line = sr.ReadLine()) != null)
+            {
+                string[] parts = line.Split(',');
+                Worker w = new Worker(Int32.Parse(parts[0]), parts[1].Trim(), parts[2].Trim());
+                workers.Add(w);
+
+            }
+            sr.Close();
+
+            return workers;
         }
+
+        public List<Wage> CreateWagesList()
+        {
+            string fileWages = "Data/wages.txt";
+            string line;
+
+            System.IO.StreamReader sr = new System.IO.StreamReader(fileWages);
+            List<Wage> wages = new List<Wage>();
+
+            while ((line = sr.ReadLine()) != null)
+            {
+                string[] parts = line.Split(',');
+                bool isHol = (parts[0].Trim() == "2");
+
+                Wage w = new Wage(Int32.Parse(parts[0]), Int32.Parse(parts[1]), isHol);
+                wages.Add(w);
+
+            }
+            sr.Close();
+
+            return wages;
+        }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

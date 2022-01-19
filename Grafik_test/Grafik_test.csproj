@@ -6,6 +6,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Data\wages.txt" />
+    <None Remove="Data\workers.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Data\wages.txt">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Data\workers.txt">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
 

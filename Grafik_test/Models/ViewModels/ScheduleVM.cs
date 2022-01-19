@@ -63,7 +63,7 @@ namespace Grafik_test.Models.ViewModels
         }
 
         [System.Obsolete]
-        public ScheduleVM(int month, int year, List<Worker> workers, List<Wage> wages, int numberOfShifts, int minBreak, int minWeekend) : this()
+        public ScheduleVM(int month, int year, List<Worker> workers, List<Wage> wages, int numberOfShifts, int minBreak, int minWeekend, float wageWeek, float wageWeekend) : this()
         {
             DefaultMonth = new SelectListItem
             {
@@ -88,6 +88,9 @@ namespace Grafik_test.Models.ViewModels
             WorkerWithMinSalary = workers.First(item => item.Id == Schedule.WorkerIdWithMinSalary());
             WorkerWithMaxWeekends = workers.First(item => item.Id == Schedule.WorkerIdWithMaxWeekends());
             WorkerWithMinWeekends = workers.First(item => item.Id == Schedule.WorkerIdWithMinWeekends());
+
+            WeekendWagePerHour = wageWeekend;
+            WeekWagePerHour = wageWeek;
         }
     }
 }

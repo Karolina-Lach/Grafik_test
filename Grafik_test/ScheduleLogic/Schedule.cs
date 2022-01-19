@@ -130,12 +130,12 @@ namespace Grafik_test.ScheduleLogic
                 if (wage.IsHoliday)
                 {
                     _wagePerHolidayHour = wage.WagePerHour;
-                    _salaryPerShiftHoliday = _wagePerHolidayHour * ShiftsPerDay;
+                    _salaryPerShiftHoliday = _wagePerHolidayHour * (24 / ShiftsPerDay);
                 }
                 else
                 {
                     _wagePerHour = wage.WagePerHour;
-                    _salaryPerShift = _wagePerHour * ShiftsPerDay;
+                    _salaryPerShift = _wagePerHour * (24 / ShiftsPerDay);
                 }
             }
         }
@@ -170,7 +170,7 @@ namespace Grafik_test.ScheduleLogic
         /// <returns></returns>
         private List<int> InitSchedule()
         {
-            
+
             //int numberOfPositions = NumberOfShifts * _workersPerShift;
 
             //int listSize = (int)Math.Ceiling(Convert.ToDecimal(numberOfPositions) / Convert.ToDecimal(NumberOfAvailableWorkers));
@@ -179,7 +179,7 @@ namespace Grafik_test.ScheduleLogic
             //{
             //    scheduleList.AddRange(Workers);
             //}
-            
+
 
             Random rnd = new Random();
 
