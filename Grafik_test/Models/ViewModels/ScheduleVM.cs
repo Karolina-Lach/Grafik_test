@@ -1,19 +1,28 @@
 ﻿using Grafik_test.ScheduleLogic;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Grafik_test.Models.ViewModels
 {
     public class ScheduleVM
     {
+        /**** Listy do list rozwijanych ****/
         public List<SelectListItem> MonthList;
         public List<SelectListItem> YearList;
         public List<SelectListItem> WorkerList;
+        public SelectListItem DefaultMonth;
 
+        /**** Grafiki ****/
         public Schedule Schedule;
         public List<Worker> Workers;
+        public Worker WorkerWithMaxSalary;
+        public Worker WorkerWithMinSalary;
+        public Worker WorkerWithMaxWeekends;
+        public Worker WorkerWithMinWeekends;
+        public float WeekWagePerHour;
+        public float WeekendWagePerHour;
 
-        public SelectListItem DefaultMonth;
         public ScheduleVM()
         {
             MonthList = new List<SelectListItem>();
@@ -26,6 +35,7 @@ namespace Grafik_test.Models.ViewModels
                     Value = i.ToString()
                 });
             }
+
 
 
             YearList = new List<SelectListItem>();
@@ -44,6 +54,12 @@ namespace Grafik_test.Models.ViewModels
                 Text = @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.MonthNames[@System.DateTime.Today.Month - 1],
                 Value = @System.DateTime.Today.Month.ToString()
             };
+        }
+        public ScheduleVM(float wageWeek, float wageWeekend) : this()
+        {
+            WeekendWagePerHour = wageWeekend;
+            WeekWagePerHour = wageWeek;
+            
         }
 
         [System.Obsolete]
@@ -67,6 +83,11 @@ namespace Grafik_test.Models.ViewModels
                         Value = worker.Id.ToString()
                     });
             }
+
+            WorkerWithMaxSalary = workers.First(item => item.Id == Schedule.WorkerIdWithMaxSalary());
+            WorkerWithMinSalary = workers.First(item => item.Id == Schedule.WorkerIdWithMinSalary());
+            WorkerWithMaxWeekends = workers.First(item => item.Id == Schedule.WorkerIdWithMaxWeekends());
+            WorkerWithMinWeekends = workers.First(item => item.Id == Schedule.WorkerIdWithMinWeekends());
         }
     }
 }

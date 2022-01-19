@@ -41,7 +41,18 @@
                     <input type="text" value="35" name="minWeekend" id="minWeekend" readonly />
                 </div>
             </div>
-
+            <br/>
+            <div class="row">
+                <div class="col-4">
+                    <label>Stawka za godzinę w tygodniu</label>
+                    <input type="text" value="@Model.WeekWagePerHour" name="numberOfShifts" id="numberOfShifts" readonly />
+                </div>
+                <div class="col-4">
+                    <label>Stawka za godzine w weekend/święto</label>
+                    <input type="text" value="@Model.WeekendWagePerHour" name="minBreak" id="minBreak" readonly />
+                </div>
+    
+            </div>
 
         </div>
 
@@ -112,14 +123,14 @@
             <br />
             <div class="row">
                 <div class="col-6 pt-4">
-                    @{string maxWorker = Model.Workers[Model.Schedule.WorkerWithMaxSalary()].Name + " " + Model.Workers[Model.Schedule.WorkerWithMaxSalary()].LastName;}
-                    @{string minWorker = Model.Workers[Model.Schedule.WorkerWithMinSalary()].Name + " " + Model.Workers[Model.Schedule.WorkerWithMinSalary()].LastName;}
+                    @{string maxWorker = Model.WorkerWithMaxSalary.Name + " " + Model.WorkerWithMaxSalary.LastName;}
+                    @{string minWorker = Model.WorkerWithMinSalary.Name + " " + Model.WorkerWithMinSalary.LastName;}
                     <p>Maksymalna pensja: @Model.Schedule.SalaryPerWorker.Max(v => v.Value) dla @maxWorker</p>
                     <p>Minimalna pensja: @Model.Schedule.SalaryPerWorker.Min(v => v.Value) dla @minWorker</p>
                 </div>
                 <div class="col-6 pt-4">
-                    @{maxWorker = @Model.Workers[@Model.Schedule.WorkerWithMaxWeekends()].Name + " " + @Model.Workers[@Model.Schedule.WorkerWithMaxWeekends()].LastName;}
-                    @{minWorker = @Model.Workers[@Model.Schedule.WorkerWithMinWeekends()].Name + " " + @Model.Workers[@Model.Schedule.WorkerWithMinWeekends()].LastName;}
+                    @{maxWorker = Model.WorkerWithMaxWeekends.Name + " " + Model.WorkerWithMaxWeekends.LastName;}
+                    @{minWorker = Model.WorkerWithMinWeekends.Name + " " + Model.WorkerWithMinWeekends.LastName;}
                     <p>Maksymalna liczba weekendów: @Model.Schedule.WeekendsPerWorker.Max(v => v.Value) dla @maxWorker</p>
                     <p>Minimalna liczba weekendów: @Model.Schedule.WeekendsPerWorker.Min(v => v.Value) dla @minWorker</p>
                 </div>

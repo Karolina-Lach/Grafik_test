@@ -69,7 +69,11 @@ namespace Grafik_test.ScheduleLogic
         /// wartość - wynagrodzenie
         /// </summary>
         public Dictionary<int, float> SalaryPerWorker;
-        public Dictionary<int, int> ShiftsPerWorker;
+        /// <summary>
+        /// Słownik z liczbą weekendów dla każdego pracownika
+        /// klucz - id pracownika
+        /// wartość - liczba weekendów
+        /// </summary>
         public Dictionary<int, int> WeekendsPerWorker;
         /// <summary>
         ///  Lista z grafikiem
@@ -110,7 +114,6 @@ namespace Grafik_test.ScheduleLogic
 
             SalaryPerWorker = new Dictionary<int, float>();
             WeekendsPerWorker = new Dictionary<int, int>();
-            ShiftsPerWorker = new Dictionary<int, int>();
 
             // Stworzenie listy id na podstawie listy pracowników
             Workers = new List<int>();
@@ -119,7 +122,6 @@ namespace Grafik_test.ScheduleLogic
                 Workers.Add(worker.Id);
                 SalaryPerWorker.Add(worker.Id, 0.0f);
                 WeekendsPerWorker.Add(worker.Id, 0);
-                ShiftsPerWorker.Add(worker.Id, 0);
             }
 
             // inicjowanie stawek (zrobione w formie listy, ale wiadomo że u nas powinna mieć 2 elementy dla holiday i nie-holiday
@@ -155,9 +157,6 @@ namespace Grafik_test.ScheduleLogic
         public Shift[] CreateSchedule()
         {
             ScheduleList = InitSchedule();
-            /*
-                Manipulowanie grafikiem tak żeby było lepiej...
-            */
             ChangeSchedules();
 
             return CreateShiftArrayFromList();
@@ -203,13 +202,21 @@ namespace Grafik_test.ScheduleLogic
 
             UpdateSalaryDictionary(scheduleList);
             UpdateWeekendsDictionary(scheduleList);
-            UpdateShiftsDictionary(scheduleList);
             return scheduleList;
         }
 
+        /// <summary>
+        /// Funkcja wykonuje operację "insert" lub "switch".
+        /// Jeśli jest to możliwe funkcja usuwa pracownika z losowo wybranego miejsca i wstawia go w losowe wybrane miejsce na liście.
+        /// Jeśli insert nie jest możliwy ze względu na zadanego ograniczenia, sprawdzana jest możliwość wykonania operacji switch, tzn zamienienie miejscami 
+        /// dwóch pracowników.
+        /// Jeśli żadna z tych operacji nie jest możliwa, funkcja nie zmienia grafiku.
+        /// </summary>
+        /// <param name="numberOfInserts">Ilość opracji insert wykonanych do tej pory</param>
+        /// <param name="numberOfSwitches">Ilość operacji switch wykonanych do tej pory</param>
+        /// <returns>Uaktualnione liczby wykonanych operacji</returns>
         private Tuple<int, int> ChangeSchedulePosition(int numberOfInserts, int numberOfSwitches)
         {
-
             int from = rnd.Next(0, ScheduleList.Count);
             int to = rnd.Next(0, ScheduleList.Count);
             bool wasInsertPossible = InsertWorker(from, to);
@@ -227,10 +234,15 @@ namespace Grafik_test.ScheduleLogic
             }
             UpdateSalaryDictionary(ScheduleList);
             UpdateWeekendsDictionary(ScheduleList);
-            UpdateShiftsDictionary(ScheduleList);
             return Tuple.Create(numberOfInserts, numberOfSwitches);
         }
 
+        /// <summary>
+        /// Funkcja zamienia miejscami dwóch pracowników podanych na wejściu, jeśli ograniczenia na to pozwalają
+        /// </summary>
+        /// <param name="positionInList1">Pozycja pierwszego pracownika</param>
+        /// <param name="positionInList2">Pozycja drugiego pracownika</param>
+        /// <returns>Zwraca informację, czy zamiana mogła zostać wykonana</returns>
         private bool SwitchWorkers(int positionInList1, int positionInList2)
         {
             bool isPositionPossible = false;
@@ -247,7 +259,16 @@ namespace Grafik_test.ScheduleLogic
         }
 
 
-
+        /// <summary>
+        /// Główna pętla programu.
+        /// W pętli grafik jest modyfikowany za pomocą funkcji ChangeSchedulePositions. 
+        /// Następnie wyznaczana jest nowa różnica pomiędzy wynagrodzeniem pracowników oraz różnica między liczbą przepracowanych weekendów i świąt.
+        /// Zapamiętywane jest rozwiązanie z najmniejszą różnicą w wynagrodzeniach.
+        /// W przypadku znalezienie rozwiązania o takiej samej różnicy, co zapamiętana, sprawdzana jest różnica w liczbie weekendów. 
+        /// Jeśli ta różnica jest mniejsza- zapamiętywane jest nowe rozwiązanie.
+        /// 
+        /// Zmienne numberOfInserts i numberOfSwitches były wykorzystywane podczas debugowanie w celu porównanie ile razy grafik jest rzeczywiście modyfikowany.
+        /// </summary>
         private void ChangeSchedules()
         {
             int numberOfInserts = 0, numberOfSwitches = 0;
@@ -267,7 +288,7 @@ namespace Grafik_test.ScheduleLogic
                 }
                 else if(currentDifference == bestDifference)
                 {
-                    if (currentDifferenceWeekends <= bestDifferenceWeekends)
+                    if (currentDifferenceWeekends < bestDifferenceWeekends)
                     {
                         bestDifference = currentDifference;
                         bestDifferenceWeekends = currentDifferenceWeekends;
@@ -279,35 +300,14 @@ namespace Grafik_test.ScheduleLogic
             ScheduleList = bestScheduleList;
             UpdateSalaryDictionary(ScheduleList);
             UpdateWeekendsDictionary(ScheduleList);
-            UpdateShiftsDictionary(ScheduleList);
         }
 
-        public int GetWorkerShiftsWeekends(int worker)
-        {
-            int shifts = 0;
-            for (int i = 0; i < NumberOfPositions; i++)
-            {
-                if (IsPositionInListHoliday(i))
-                {
-                    if (ScheduleList[i] == worker)
-                        shifts++;
-                }
-            }
-            return shifts;
-        }
-
-        public int GetWorkerShifts(int worker)
-        {
-            int shifts = 0;
-            for (int i = 0; i < NumberOfPositions; i++)
-            {
-                if (ScheduleList[i] == worker)
-                    shifts++;
-            }
-            return shifts;
-        }
-
-
+        /// <summary>
+        /// Funkcja usuwa pracownika z wskazanego miejsca do wskazanego miejsca, jeśli pozwalają na to ograniczenia.
+        /// </summary>
+        /// <param name="from">Pozycja na liście, z której trzeba usunąć pracownika</param>
+        /// <param name="to">Pozycja na liście, na którą trzeba wstawić pracownika</param>
+        /// <returns>Zwraca informację, czy operacja mogła zostać wykonana</returns>
         public bool InsertWorker(int from, int to)
         {
             int tempElement = ScheduleList[from];
@@ -347,7 +347,13 @@ namespace Grafik_test.ScheduleLogic
 
             return isChangePossible;
         }
-
+        
+        /// <summary>
+        /// Wstawienie zadanej wartości value na pozycję to i usunięcie tej wartości z pozycji from
+        /// </summary>
+        /// <param name="from">Skąd usunąć</param>
+        /// <param name="to">Gdzie wstawić</param>
+        /// <param name="value">Wartość do usunięcia/wstawienia</param>
         private void Insert(int from, int to, int value)
         {
             ScheduleList.RemoveAt(from);
@@ -431,7 +437,6 @@ namespace Grafik_test.ScheduleLogic
         /// <summary>
         /// Zwraca ostatnie pojawienie się pracownika w grafiku tzn. ostatnie pojewienie się workerId na lewo od currentPosition 
         /// </summary>
-        /// <param name="schedule">lista z grafikiem</param>
         /// <param name="workerId">id pracownika</param>
         /// <param name="currentPosition">pozycja od której liczymy ostatnie wystąpienie</param>
         /// <returns></returns>
@@ -444,6 +449,12 @@ namespace Grafik_test.ScheduleLogic
 
         }
 
+        /// <summary>
+        /// Zwraca kolejne pojawienie się pracownika w grafiku tzn. kolejne pojewienie się workerId na prawo od currentPosition 
+        /// </summary>
+        /// <param name="workerId">id pracownika</param>
+        /// <param name="currentPosition">pozycja od której liczymy ostatnie wystąpienie</param>
+        /// <returns></returns>
         private int GetNextPositionInList(int workerId, int currentPosition)
         {
             if (currentPosition < ScheduleList.Count)
@@ -471,7 +482,6 @@ namespace Grafik_test.ScheduleLogic
         /// <summary>
         /// Zwraca przerwę (w godzinach) dla pracownika między podaną pozycją na liście a jego ostatnią zmianą (ostatnią pozycją, gdzie pojawiło się id pracownika)
         /// </summary>
-        /// <param name="schedule"></param>
         /// <param name="workerId"></param>
         /// <param name="currentPosition"></param>
         /// <returns></returns>
@@ -486,6 +496,12 @@ namespace Grafik_test.ScheduleLogic
             return GetBreakBetweenPositions(currentPosition, lastShift);
         }
 
+        /// <summary>
+        /// Zwraca przerwę (w godzinach) dla pracownika między podaną pozycją na liście a jego następną zmianą (następną pozycją, gdzie pojawiło się id pracownika)
+        /// </summary>
+        /// <param name="workerId"></param>
+        /// <param name="currentPosition"></param>
+        /// <returns></returns>
         private int GetNextBreakLength(int workerId, int currentPosition)
         {
             int lastShift = GetNextPositionInList(workerId, currentPosition);
@@ -497,6 +513,12 @@ namespace Grafik_test.ScheduleLogic
             return GetBreakBetweenPositions(currentPosition, lastShift);
         }
 
+        /// <summary>
+        /// Funkcja sprawdza dany pracownik może pracować na podanej zmianie (czy spełnione są ograniczenia)
+        /// </summary>
+        /// <param name="workerId">Id pracownika</param>
+        /// <param name="newPosition">Pozycja na liście</param>
+        /// <returns></returns>
         private bool IsPositionPossible(int workerId, int newPosition)
         {
             int lastBreakLength = GetLastBreakLength(workerId, newPosition);
@@ -579,7 +601,7 @@ namespace Grafik_test.ScheduleLogic
         /// Zwraca id pracownika z największą pensją w słowniku.
         /// </summary>
         /// <returns></returns>
-        public int WorkerWithMaxSalary()
+        public int WorkerIdWithMaxSalary()
         {
             var richestWorkers = SalaryPerWorker.Where(x => x.Value == SalaryPerWorker.Max(v => v.Value));
             return richestWorkers.FirstOrDefault().Key;
@@ -589,7 +611,7 @@ namespace Grafik_test.ScheduleLogic
         /// Zwraca id pracownika z najmniejszą pensją w słowniku.
         /// </summary>
         /// <returns></returns>
-        public int WorkerWithMinSalary()
+        public int WorkerIdWithMinSalary()
         {
             var poorestWorkers = SalaryPerWorker.Where(x => x.Value == SalaryPerWorker.Min(v => v.Value));
             return poorestWorkers.FirstOrDefault().Key;
@@ -601,10 +623,13 @@ namespace Grafik_test.ScheduleLogic
         /// <returns></returns>
         public float GetDifferenceMinMaxSalary()
         {
-            return SalaryPerWorker[WorkerWithMaxSalary()] - SalaryPerWorker[WorkerWithMinSalary()];
+            return SalaryPerWorker[WorkerIdWithMaxSalary()] - SalaryPerWorker[WorkerIdWithMinSalary()];
         }
 
-
+        /// <summary>
+        /// Zamienia grafik w postaci listy id pracowników na tablicę.
+        /// </summary>
+        /// <returns></returns>
         public Shift[] CreateShiftArrayFromList()
         {
             ScheduleTable = new Shift[NumberOfShifts];
@@ -620,7 +645,10 @@ namespace Grafik_test.ScheduleLogic
             return ScheduleTable;
         }
 
-
+        /// <summary>
+        /// Aktualizuje cały słownik z liczbą weekendów dla pracownikow. Iteruje po liście z grafikiemm, sprawdza czy zmiana jest w weekend/święto i zlicza te zmiany.
+        /// </summary>
+        /// <param name="schedule"></param>
         private void UpdateWeekendsDictionary(List<int> schedule)
         {
             WeekendsPerWorker.Keys.ToList().ForEach(i => WeekendsPerWorker[i] = 0);
@@ -637,52 +665,68 @@ namespace Grafik_test.ScheduleLogic
             }
         }
 
-        public int WorkerWithMaxWeekends()
+        /// <summary>
+        /// Zwraca id pracownika z największą liczbą weekendów w słowniku WeekendsPerWorker.
+        /// </summary>
+        /// <returns></returns>
+        public int WorkerIdWithMaxWeekends()
         {
             var weekendWorkers = WeekendsPerWorker.Where(x => x.Value == WeekendsPerWorker.Max(v => v.Value));
             return weekendWorkers.FirstOrDefault().Key;
         }
 
-        public int WorkerWithMinWeekends()
+        /// <summary>
+        /// Zwraca id pracownika z najmniejszą liczbą weekendów w słowniku WeekendsPerWorker.
+        /// </summary>
+        /// <returns></returns>
+        public int WorkerIdWithMinWeekends()
         {
             var weekWorkers = WeekendsPerWorker.Where(x => x.Value == WeekendsPerWorker.Min(v => v.Value));
             return weekWorkers.FirstOrDefault().Key;
         }
 
+        /// <summary>
+        /// Zwraca różnice między największą i najmniejszą liczbą weekendów
+        /// </summary>
+        /// <returns></returns>
         public int GetDifferenceMinMaxWeekends()
         {
-            return WeekendsPerWorker[WorkerWithMaxWeekends()] - WeekendsPerWorker[WorkerWithMinWeekends()];
+            return WeekendsPerWorker[WorkerIdWithMaxWeekends()] - WeekendsPerWorker[WorkerIdWithMinWeekends()];
         }
 
-
-        private void UpdateShiftsDictionary(List<int> schedule)
+        /// <summary>
+        /// Funkcja zwraca liczbę przepracowanych zmian w weekendy/święta dla zadanego pracownika.
+        /// </summary>
+        /// <param name="worker">Id pracownika</param>
+        /// <returns>Liczba przepracowanych zmian</returns>
+        public int GetWorkerShiftsWeekends(int worker)
         {
-            ShiftsPerWorker.Keys.ToList().ForEach(i => ShiftsPerWorker[i] = 0);
-
-            // Liczymy tylko tyle ile jest zmian, nie dla całej listy "schedule"
-            // W liście schedule może być więcej pozycji niż rzeczywiście jest zmian
-            // w miesiącu (16 * 12)
+            int shifts = 0;
             for (int i = 0; i < NumberOfPositions; i++)
             {
-                ShiftsPerWorker[schedule[i]]++;
+                if (IsPositionInListHoliday(i))
+                {
+                    if (ScheduleList[i] == worker)
+                        shifts++;
+                }
             }
+            return shifts;
         }
 
-        public int WorkerWithMaxShifts()
+        /// <summary>
+        /// Funkcja zwraca liczbę wszystkich zmian dla zadanego pracownika.
+        /// </summary>
+        /// <param name="worker">Id pracownika</param>
+        /// <returns>Liczba przepracowanych zmian</returns>
+        public int GetWorkerShifts(int worker)
         {
-            var busyWorkers = ShiftsPerWorker.Where(x => x.Value == ShiftsPerWorker.Max(v => v.Value));
-            return busyWorkers.FirstOrDefault().Key;
-        }
-
-        public int WorkerWithMinShifts()
-        {
-            var lazyWorkers = ShiftsPerWorker.Where(x => x.Value == ShiftsPerWorker.Min(v => v.Value));
-            return lazyWorkers.FirstOrDefault().Key;
-        }
-
-        public int GetDifferenceMinMaxShifts()
-        {
-            return ShiftsPerWorker[WorkerWithMaxWeekends()] - ShiftsPerWorker[WorkerWithMinWeekends()];
+            int shifts = 0;
+            for (int i = 0; i < NumberOfPositions; i++)
+            {
+                if (ScheduleList[i] == worker)
+                    shifts++;
+            }
+            return shifts;
         }
 
     }

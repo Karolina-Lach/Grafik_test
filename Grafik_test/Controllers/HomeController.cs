@@ -26,9 +26,15 @@ namespace Grafik_test.Controllers
 
         public IActionResult Index()
         {
-            var test = _db.Set<Test>();
-            var test1 = test.ToList();
-            return View(new ScheduleVM());
+            // TODO: wczytanie z pliku
+            List<Wage> wages = new List<Wage>
+            {
+                new Wage(1, 30, false),
+                new Wage(2, 60, true)
+            };
+            float weekWagePerHour = wages.First(wage => wage.IsHoliday == false).WagePerHour;
+            float weekendWagePerHour = wages.First(wage => wage.IsHoliday == true).WagePerHour;
+            return View(new ScheduleVM(weekWagePerHour, weekendWagePerHour));
         }
 
         [HttpPost]
@@ -39,9 +45,7 @@ namespace Grafik_test.Controllers
             {
                 return View(new ScheduleVM());
             }
-
-            //List<Worker> workers = _db.Set<Worker>().ToList();
-            //List<Wage> wages = _db.Set<Wage>().ToList();
+            // TODO: wczytanie z pliku
             List<Worker> workers = new List<Worker>
             {
                 new Worker(1, "Fabian", "Wasilewski"),
@@ -57,20 +61,18 @@ namespace Grafik_test.Controllers
                 new Worker(11, "Dominik", "Bąk"),
                 new Worker(12, "Aureliusz", "Sadowski")
             };
-
+            // TODO: wczytanie z pliku
             List<Wage> wages = new List<Wage>
             {
                 new Wage(1, 30, false),
                 new Wage(2, 60, true)
             };
 
-
             ScheduleVM scheduleVM = new ScheduleVM(int.Parse(month), int.Parse(year), workers, wages,
                 int.Parse(numberOfShifts), int.Parse(minBreak), int.Parse(minWeekend));
             scheduleVM.Schedule.CreateSchedule();
             var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(int.Parse(month));
             ViewBag.Name = char.ToUpper(monthName[0]) + monthName[1..] + " " + year;
-
             return View(scheduleVM);
         }
 
