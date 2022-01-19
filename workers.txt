@@ -1,0 +1,12 @@
+﻿1, Fabian, Wasilewski
+2, Czesław, Chmielewski
+3, Kajetan, Kaźmierczak
+4, Amadeusz, Jaworski
+5, Diego, Kubiak
+6, Jędrzej, Szczepański
+7, Antoni, Malinowski
+8, Fabian, Czerwiński
+9, Emil, Sokołowski
+10, Alexander, Zieliński
+11, Dominik, Bąk
+12, Aureliusz, Sadowski
