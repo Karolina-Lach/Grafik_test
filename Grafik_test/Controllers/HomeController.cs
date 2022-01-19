@@ -1,6 +1,7 @@
 ﻿using Grafik_test.Data;
 using Grafik_test.Models;
 using Grafik_test.Models.ViewModels;
+using Grafik_test.ScheduleLogic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -39,30 +40,13 @@ namespace Grafik_test.Controllers
                 return View(new ScheduleVM());
             }
 
-            //List<Worker> workers = _db.Set<Worker>().ToList();
-            //List<Wage> wages = _db.Set<Wage>().ToList();
-            List<Worker> workers = new List<Worker>
-            {
-                new Worker(1, "A", "Aa"),
-                new Worker(2, "B", "Bb"),
-                new Worker(3, "C", "Cc"),
-                new Worker(4, "D", "Dd"),
-                new Worker(5, "E", "Ee"),
-                new Worker(6, "F", "Ff"),
-                new Worker(7, "G", "Gg"),
-                new Worker(8, "H", "Hh"),
-                new Worker(9, "I", "Ii"),
-                new Worker(10, "J", "Jj"),
-                new Worker(11, "K", "Kk"),
-                new Worker(12, "L", "Ll")
-            };
+            
+            List<Worker> workers = new List<Worker>();
+            workers = CreateListOfWorkers();
 
-            List<Wage> wages = new List<Wage>
-            {
-                new Wage(1, 30, false),
-                new Wage(2, 60, true)
-            };
-
+            List<Wage> wages = new List<Wage>();
+            wages = CreateWagesList();
+        
 
             ScheduleVM scheduleVM = new ScheduleVM(int.Parse(month), int.Parse(year), workers, wages,
                 int.Parse(numberOfShifts), int.Parse(minBreak), int.Parse(minWeekend));
@@ -76,6 +60,49 @@ namespace Grafik_test.Controllers
         public IActionResult Privacy()
         {
             return View();
+        }
+
+        public List<Worker> CreateListOfWorkers()
+        {
+
+            string fileWorker = "workers.txt";
+            string line;
+
+            System.IO.StreamReader sr = new System.IO.StreamReader(fileWorker);
+            List<Worker> workers = new List<Worker>();
+
+            while ((line = sr.ReadLine()) != null)
+            {
+                string[] parts = line.Split(',');
+                Worker w = new Worker(Int32.Parse(parts[0]), parts[1].Trim(), parts[2].Trim());
+                workers.Add(w);
+
+            }
+            sr.Close();
+
+            return workers;
+        }
+
+        public List<Wage> CreateWagesList()
+        {
+            string fileWages = "wages.txt";
+            string line;
+
+            System.IO.StreamReader sr = new System.IO.StreamReader(fileWages);
+            List<Wage> wages = new List<Wage>();
+
+            while ((line = sr.ReadLine()) != null)
+            {
+                string[] parts = line.Split(',');
+                bool isHol = (parts[0].Trim() == "2");
+                
+                Wage w = new Wage(Int32.Parse(parts[0]), Int32.Parse(parts[1]), isHol);
+                wages.Add(w);
+
+            }
+            sr.Close();
+
+            return wages;
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
