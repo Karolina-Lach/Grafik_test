@@ -53,6 +53,10 @@ namespace Grafik_test.Controllers
             ScheduleVM scheduleVM = new ScheduleVM(int.Parse(month), int.Parse(year), workers, wages,
                 int.Parse(numberOfShifts), int.Parse(minBreak), int.Parse(minWeekend), weekendWagePerHour, weekendWagePerHour);
             scheduleVM.Schedule.CreateSchedule();
+            scheduleVM.WorkerWithMaxSalary = workers.First(item => item.Id == scheduleVM.Schedule.WorkerIdWithMaxSalary());
+            scheduleVM.WorkerWithMinSalary = workers.First(item => item.Id == scheduleVM.Schedule.WorkerIdWithMinSalary());
+            scheduleVM.WorkerWithMaxWeekends = workers.First(item => item.Id == scheduleVM.Schedule.WorkerIdWithMaxWeekends());
+            scheduleVM.WorkerWithMinWeekends = workers.First(item => item.Id == scheduleVM.Schedule.WorkerIdWithMinWeekends());
             var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(int.Parse(month));
             ViewBag.Name = char.ToUpper(monthName[0]) + monthName[1..] + " " + year;
             return View(scheduleVM);

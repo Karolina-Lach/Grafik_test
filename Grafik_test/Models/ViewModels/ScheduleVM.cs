@@ -84,10 +84,6 @@ namespace Grafik_test.Models.ViewModels
                     });
             }
 
-            WorkerWithMaxSalary = workers.First(item => item.Id == Schedule.WorkerIdWithMaxSalary());
-            WorkerWithMinSalary = workers.First(item => item.Id == Schedule.WorkerIdWithMinSalary());
-            WorkerWithMaxWeekends = workers.First(item => item.Id == Schedule.WorkerIdWithMaxWeekends());
-            WorkerWithMinWeekends = workers.First(item => item.Id == Schedule.WorkerIdWithMinWeekends());
 
             WeekendWagePerHour = wageWeekend;
             WeekWagePerHour = wageWeek;
