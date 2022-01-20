@@ -51,7 +51,7 @@ namespace Grafik_test.Controllers
             float weekWagePerHour = wages.First(wage => wage.IsHoliday == false).WagePerHour;
             float weekendWagePerHour = wages.First(wage => wage.IsHoliday == true).WagePerHour;
             ScheduleVM scheduleVM = new ScheduleVM(int.Parse(month), int.Parse(year), workers, wages,
-                int.Parse(numberOfShifts), int.Parse(minBreak), int.Parse(minWeekend), weekendWagePerHour, weekendWagePerHour);
+                int.Parse(numberOfShifts), int.Parse(minBreak), int.Parse(minWeekend), weekWagePerHour, weekendWagePerHour);
             scheduleVM.Schedule.CreateSchedule();
             scheduleVM.WorkerWithMaxSalary = workers.First(item => item.Id == scheduleVM.Schedule.WorkerIdWithMaxSalary());
             scheduleVM.WorkerWithMinSalary = workers.First(item => item.Id == scheduleVM.Schedule.WorkerIdWithMinSalary());
